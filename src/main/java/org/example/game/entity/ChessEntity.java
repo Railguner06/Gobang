@@ -2,6 +2,8 @@ package org.example.game.entity;
 
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 @Data
@@ -16,6 +18,9 @@ public class ChessEntity {
     private int[][] score = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];
     // 用于记录每一步的历史
     private Stack<LocationEntity> history = new Stack<>();
+
+    private Set<LocationEntity> disabledLocations = new HashSet<>();
+
 
     /**
      * 初始化
