@@ -1,5 +1,8 @@
 package org.example.game;
 
+import org.example.game.entity.ChessEntity;
+import org.example.game.entity.LocationEntity;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -7,11 +10,13 @@ import java.util.ArrayList;
 public class Chessboard extends JPanel{
 
     public static final int CHESSBOARD_SIZE = 15; // 棋盘大小15X15
-    private ArrayList<Location> locationList = new ArrayList<>(); // 棋盘上所有已落子的位置坐标
+    private ArrayList<LocationEntity> locationList = new ArrayList<>(); // 棋盘上所有已落子的位置坐标
     private Color backgroundColor = new Color(255, 245, 186); // 棋盘背景色
     private Color lineColor = new Color(66, 66, 66); // 棋盘线条颜色
     private int margin = 20; // 棋盘边缘长度
     private int[][] boardState = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE]; // 记录棋盘状态，0 表示空，1 表示玩家，-1 表示 AI
+
+    private ChessEntity chess;
 
     // 初始化棋盘
     public void init() {
@@ -47,8 +52,8 @@ public class Chessboard extends JPanel{
 
     // 画棋子
     public void drawChessman(Graphics g) {
-        for (Location loc : locationList) {
-            g.setColor(loc.getOwner() == Chess.FIRST ? Color.BLACK : Color.WHITE);
+        for (LocationEntity loc : locationList) {
+            g.setColor(loc.getOwner() == chess.FIRST ? Color.BLACK : Color.WHITE);
             int cellSize = (this.getWidth() - 2 * margin) / (CHESSBOARD_SIZE - 1); // 每个格子的边长
             g.fillOval(margin + cellSize * loc.getX() - cellSize / 2, margin + cellSize * loc.getY() - cellSize / 2, cellSize, cellSize);
         }
@@ -57,14 +62,14 @@ public class Chessboard extends JPanel{
     // 落子
     public void addChessman(int x, int y, int owner) {
         if (boardState[x][y] == 0) { // 检查当前位置是否为空
-            locationList.add(new Location(x, y, owner));
+            locationList.add(new LocationEntity(x, y, owner));
             boardState[x][y] = owner; // 更新棋盘状态
             repaint();
         }
     }
 
     // 重载的落子方法
-    public void addChessman(Location loc) {
+    public void addChessman(LocationEntity loc) {
         addChessman(loc.getX(), loc.getY(), loc.getOwner());
     }
 
@@ -81,11 +86,11 @@ public class Chessboard extends JPanel{
     // 悔棋：移除最后两个棋子
     public void undoMove() {
         if (!locationList.isEmpty()) {
-            Location lastMove = locationList.remove(locationList.size() - 1); // 移除最后一个棋子
+            LocationEntity lastMove = locationList.remove(locationList.size() - 1); // 移除最后一个棋子
             boardState[lastMove.getX()][lastMove.getY()] = 0; // 更新棋盘状态为空
         }
         if (!locationList.isEmpty()) {
-            Location secondLastMove = locationList.remove(locationList.size() - 1); // 再次移除上一个棋子
+            LocationEntity secondLastMove = locationList.remove(locationList.size() - 1); // 再次移除上一个棋子
             boardState[secondLastMove.getX()][secondLastMove.getY()] = 0; // 更新棋盘状态为空
         }
         repaint(); // 重新绘制棋盘

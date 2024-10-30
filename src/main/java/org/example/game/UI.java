@@ -1,19 +1,27 @@
 package org.example.game;
 
+import org.example.game.entity.ChessEntity;
+import org.example.game.entity.LocationEntity;
+import org.example.game.service.ChessService;
+import org.example.game.service.impl.ChessServiceImpl;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-//界面类，这是游戏主体框架
+/**
+ * todo 把chessboard解耦，有chessboard的都要改，标记的不全
+ * UI界面
+ */
 public class UI{
 
     private JFrame frame;//五子棋游戏窗口
 
     //五子棋盘【关键】
-    private Chessboard chessboard = new Chessboard();//五子棋盘
+    private Chessboard chessboard;
     //*****五子棋业务逻辑【关键】
-    private Chess chess = new Chess();
+    private ChessService chessService = new ChessServiceImpl();
 
     private JMenuBar menu;//菜单栏
     private JMenu option;//选项菜单
@@ -23,14 +31,11 @@ public class UI{
 
     private Action undoOption;//悔棋选项
 
-    //游戏运行入口
-    public static void main(String[] args){
-        new UI().init();
-    }
+
 
     //完成五子棋游戏界面
-    public void init(){
-
+    public void init(Chessboard board,ChessEntity chess){
+        chessboard = board;
         frame = new JFrame("人机对战五子棋");//创建游戏界面窗口
         menu = new JMenuBar();//创建菜单栏
         option = new JMenu("选项");//创建菜单栏中的“选项”菜单
@@ -52,8 +57,9 @@ public class UI{
         frame.add(chessboard);//把五子棋盘加入到frame
 
         //初始化棋盘
+        //todo
         chessboard.init();
-        chess.init();
+        chessService.init();
 
         //【【【最核心】】】绑定鼠标事件，要下棋了，为了避免写无用的抽象方法的实现，用适配器
         chessboard.addMouseListener(new MouseAdapter(){
@@ -67,7 +73,6 @@ public class UI{
         frame.setIconImage(frame.getToolkit().getImage("image/gobang.png"));
         frame.setSize(518, 565);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.pack();
         frame.setVisible(true);
     }
 
@@ -77,8 +82,9 @@ public class UI{
     public void replayOptionInit(){
         replayOption = new AbstractAction("重玩一盘", new ImageIcon("image/replay.png")){
             public void actionPerformed(ActionEvent e){
+                //todo
                 chessboard.init();//界面方面：初始化重来
-                chess.init();//逻辑业务方面：初始化重来
+                chessService.init();//逻辑业务方面：初始化重来
             }
         };
     }
@@ -89,10 +95,11 @@ public class UI{
             public void actionPerformed(ActionEvent e){
                 //棋盘还没有落子的时候可以选择“机器先手”，一旦有落子，选择“机器先手”失效
                 if(chessboard.isEmpty()){
-                    Chess.FIRST = -1;
+                    ChessEntity.FIRST = -1;
                     //机器先手，则先在中间位置下一个棋子
+                    //todo
                     chessboard.addChessman(7, 7, -1);
-                    chess.addChessman(7, 7, -1);
+                    chessService.addChessman(new LocationEntity(7,7,-1));
                 }
             }
         };
@@ -103,8 +110,9 @@ public class UI{
         HumanFirstOption = new AbstractAction("人类先手", new ImageIcon("image/human.png")){
             public void actionPerformed(ActionEvent e){
                 //棋盘还没有落子的时候可以选择“人类先手”，一旦有落子，选择“人类先手”失效
+                //todo
                 if(chessboard.isEmpty()){
-                    Chess.FIRST = 1;
+                    chessService.getChess().FIRST = 1;
                 }
             }
         };
@@ -116,30 +124,35 @@ public class UI{
         int x = (e.getX() - 5) / cellSize;//像素值转换成棋盘坐标
         int y = (e.getY() - 5) / cellSize;//像素值转换成棋盘坐标
         //判断落子是否合法
-        boolean isLegal = chess.isLegal(x, y);
+        boolean isLegal = chessService.isLegal(new LocationEntity(x,y));
         //如果落子合法
         if(isLegal){
+            //todo
             chessboard.addChessman(x, y, 1);//界面方面加一个棋子
-            chess.addChessman(x, y, 1);//逻辑业务方面加一个棋子
+            chessService.addChessman(new LocationEntity(x,y,1));//逻辑业务方面加一个棋子
 
             //判断人类是否胜利
-            if(chess.isWin(x, y, 1)){
+            if(chessService.isWin(new LocationEntity(x,y,1))){
                 JOptionPane.showMessageDialog(frame, "人类获胜", "Congratulations，您赢了！", JOptionPane.PLAIN_MESSAGE);
+                //???????????????????????????
                 chessboard.init();
-                chess.init();
+                chessService.init();
                 return;
             }
 
             //机器落子
-            Location loc = chess.searchLocation();
+            LocationEntity loc = chessService.searchLocation();
+            //todo
             chessboard.addChessman(loc);
-            chess.addChessman(loc.getX(), loc.getY(), loc.getOwner());
+            chessService.addChessman(new LocationEntity(loc.getX(), loc.getY(), loc.getOwner()));
+
 
             //判断机器是否胜利
-            if(chess.isWin(loc.getX(), loc.getY(), -1)){
+            if(chessService.isWin(new LocationEntity(loc.getX(), loc.getY(),  -1))){
                 JOptionPane.showMessageDialog(frame, "机器获胜", "Congratulations，您输了！", JOptionPane.PLAIN_MESSAGE);
+                //todo
                 chessboard.init();
-                chess.init();
+                chessService.init();
                 return;
             }
         }
@@ -149,7 +162,8 @@ public class UI{
         undoOption = new AbstractAction("悔棋", new ImageIcon("image/undo.png")) {
             public void actionPerformed(ActionEvent e) {
                 // 检查是否有可以悔棋的操作
-                if (chess.undoMove()) { // 若棋局逻辑能悔棋
+                if (chessService.undoMove()) { // 若棋局逻辑能悔棋
+                    //todo
                     chessboard.undoMove(); // 在界面上也撤销最新的一步棋
                 } else {
                     JOptionPane.showMessageDialog(frame, "无可悔棋的操作", "提示", JOptionPane.WARNING_MESSAGE);

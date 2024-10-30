@@ -1,69 +1,89 @@
-package org.example.game;
+package org.example.game.service.impl;
 
+import lombok.Data;
+import org.example.game.entity.LocationEntity;
+import org.example.game.entity.ChessEntity;
+import org.example.game.service.ChessService;
 
 import java.util.Stack;
 
-//下棋业务核心类，与界面棋盘对应，业务放在这里，可以和界面代码分离
-public class Chess{
-    public static final int CHESSBOARD_SIZE = 15;
-    public static int FIRST = 1;//先手，-1表示机器，1表示人类，与Location类中的对应
-    private int[][] chessboard = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//与界面棋盘对应，0代表空，-1代表机器，1代表人类
-    private int[][] score = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//每个位置得分
+import static org.example.game.entity.ChessEntity.CHESSBOARD_SIZE;
+@Data
+public class ChessServiceImpl implements ChessService {
 
-    private Stack<Location> history = new Stack<>(); // 用于记录每一步的历史
+    private ChessEntity chess;
 
-    private static class Move {
-        int x, y, owner;
-
-        Move(int x, int y, int owner) {
-            this.x = x;
-            this.y = y;
-            this.owner = owner;
-        }
+    public ChessEntity getChess() {
+        return chess;
     }
 
-    public Chess(){
-        init();
-    }
-
-    //初始化
+    /**
+     * 初始化
+     */
+    @Override
     public void init(){
-        FIRST = 1;//默认人类先手
-        for(int i = 0; i  < CHESSBOARD_SIZE; i++){
-            for(int j = 0; j < CHESSBOARD_SIZE; j++){
-                chessboard[i][j] = 0;
-                score[i][j] = 0;
-            }
-        }
-        history.clear();
+        chess = new ChessEntity();
+        chess.init();
     }
 
-    //落子
-    public void addChessman(int x, int y, int owner){
-        chessboard[x][y] = owner;
-        history.push(new Location(x,y,owner));
+    /**
+     * 落子
+     * @param location
+     */
+    @Override
+    public void addChessman(LocationEntity location){
+        int[][] chessboard = chess.getChessboard();
+        chessboard[location.getX()][location.getY()] = location.getOwner();
+        chess.push(new LocationEntity(location));
+
     }
 
-    //判断落子位置是否合法
-    public boolean isLegal(int x, int y) {
+    /**
+     * 判断落子位置是否合法
+     * @param location
+     * @return
+     */
+    @Override
+    public boolean isLegal(LocationEntity location) {
+        int x = location.getX();
+        int y = location.getY();
+        int[][] chessboard = chess.getChessboard();
         return x >= 0 && x < CHESSBOARD_SIZE && y >= 0 && y < CHESSBOARD_SIZE && chessboard[x][y] == 0;
     }
 
-    // 悔棋：回退两步
+    /**
+     * 悔棋：回退两步
+     * @return
+     */
+    @Override
     public boolean undoMove() {
+        Stack<LocationEntity> history = chess.getHistory();
+        int[][] chessboard = chess.getChessboard();
         if (history.size() >= 2) { // 检查是否有足够步数可以悔棋
-            Location lastMove = history.pop(); // 取出最后一个落子位置
+            LocationEntity lastMove = history.pop(); // 取出最后一个落子位置
             chessboard[lastMove.getX()][lastMove.getY()] = 0; // 清空该位置
-            Location secondLastMove = history.pop(); // 取出倒数第二个落子位置
+            LocationEntity secondLastMove = history.pop(); // 取出倒数第二个落子位置
             chessboard[secondLastMove.getX()][secondLastMove.getY()] = 0; // 清空该位置
             return true;
         }
         return false; // 不足两步无法悔棋
     }
 
-    //判断哪方赢了（必定有刚落的子引发，因此只需判断刚落子的周围），owner为-1代表机器，owner为1代表人类
-    public boolean isWin(int x, int y, int owner){
+    /**
+     * 判断哪方赢了
+     * （必定有刚落的子引发，因此只需判断刚落子的周围），owner为-1代表机器，owner为1代表人类
+     * @param location
+     * @return
+     */
+    @Override
+    public boolean isWin(LocationEntity location){
+        int x = location.getX();
+        int y = location.getY();
+        int owner = location.getOwner();
+        int[][] chessboard = chess.getChessboard();
+
         int sum = 0;
+
         //判断横向左边
         for(int i = x - 1; i >= 0; i--){
             if(chessboard[i][y] == owner){sum++;}
@@ -119,18 +139,16 @@ public class Chess{
 
     }
 
+    /**
+     * 五元组搜查位置
+     * @return
+     */
+    @Override
+    public LocationEntity searchLocation(){
+        int[][] chessboard = chess.getChessboard();
+        int[][] score = chess.getScore();
 
-    //【【【【【*******整个游戏的核心*******】】】】】______确定机器落子位置
-    //使用五元组评分算法，该算法参考博客地址：https://blog.csdn.net/u011587401/article/details/50877828
-    //算法思路：对15X15的572个五元组分别评分，一个五元组的得分就是该五元组为其中每个位置贡献的分数，
-    //	   一个位置的分数就是其所在所有五元组分数之和。所有空位置中分数最高的那个位置就是落子位置。
-    public Location searchLocation(){
-        //每次都初始化下score评分数组
-        for(int i = 0; i  < CHESSBOARD_SIZE; i++){
-            for(int j = 0; j < CHESSBOARD_SIZE; j++){
-                score[i][j] = 0;
-            }
-        }
+
 
         //每次机器找寻落子位置，评分都重新算一遍（虽然算了很多多余的，因为上次落子时候算的大多都没变）
         //先定义一些变量
@@ -314,15 +332,20 @@ public class Chess{
         }
 
         if(goalX != -1 && goalY != -1){
-            return new Location(goalX, goalY, -1);
+            return new LocationEntity(goalX, goalY, -1);
         }
 
         //没找到坐标说明平局了，笔者不处理平局
-        return new Location(-1, -1, -1);
+        return new LocationEntity(-1, -1, -1);
     }
 
-    //各种五元组情况评分表
-    public int tupleScore(int humanChessmanNum, int machineChessmanNum){
+    /**
+     * 各种五元组情况评分表
+     * @param humanChessmanNum
+     * @param machineChessmanNum
+     * @return
+     */
+    private int tupleScore(int humanChessmanNum, int machineChessmanNum){
         //1.既有人类落子，又有机器落子，判分为0
         if(humanChessmanNum > 0 && machineChessmanNum > 0){
             return 0;
@@ -365,5 +388,4 @@ public class Chess{
         }
         return -1;//若是其他结果肯定出错了。这行代码根本不可能执行
     }
-
 }
