@@ -42,7 +42,6 @@ public class ChessServiceImpl implements ChessService {
             chess.push(location); // 记录该落子位置
         }
         chessboard[location.getX()][location.getY()] = location.getOwner();
-        chess.push(new LocationEntity(location));
         chess.setChessboard(chessboard);
     }
 
@@ -158,8 +157,6 @@ public class ChessServiceImpl implements ChessService {
     public LocationEntity searchLocation(){
         int[][] chessboard = chess.getChessboard();
         int[][] score = chess.getScore();
-
-
 
         //每次机器找寻落子位置，评分都重新算一遍（虽然算了很多多余的，因为上次落子时候算的大多都没变）
         //先定义一些变量
