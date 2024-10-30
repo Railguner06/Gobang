@@ -34,7 +34,7 @@ public class UI{
 
 
     //完成五子棋游戏界面
-    public void init(Chessboard board,ChessEntity chess){
+    public void init(Chessboard board){
         chessboard = board;
         frame = new JFrame("人机对战五子棋");//创建游戏界面窗口
         menu = new JMenuBar();//创建菜单栏
@@ -85,6 +85,7 @@ public class UI{
                 //todo
                 chessboard.init();//界面方面：初始化重来
                 chessService.init();//逻辑业务方面：初始化重来
+                chessService.init();//逻辑业务方面：初始化重来
             }
         };
     }
@@ -134,7 +135,7 @@ public class UI{
             //判断人类是否胜利
             if(chessService.isWin(new LocationEntity(x,y,1))){
                 JOptionPane.showMessageDialog(frame, "人类获胜", "Congratulations，您赢了！", JOptionPane.PLAIN_MESSAGE);
-                //???????????????????????????
+                //todo
                 chessboard.init();
                 chessService.init();
                 return;
@@ -153,7 +154,6 @@ public class UI{
                 //todo
                 chessboard.init();
                 chessService.init();
-                return;
             }
         }
     }

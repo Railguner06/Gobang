@@ -27,15 +27,23 @@ public class ChessServiceImpl implements ChessService {
     }
 
     /**
-     * 落子
+     * 落子(包括机器下子）
      * @param location
      */
     @Override
     public void addChessman(LocationEntity location){
+        int x = location.getX();
+        int y = location.getY();
+        int owner = location.getOwner();
         int[][] chessboard = chess.getChessboard();
+        // 落子并更新棋盘状态
+        if (chessboard[x][y] == 0) { // 只有在位置为空时才能落子
+            chessboard[x][y] = owner;
+            chess.push(location); // 记录该落子位置
+        }
         chessboard[location.getX()][location.getY()] = location.getOwner();
         chess.push(new LocationEntity(location));
-
+        chess.setChessboard(chessboard);
     }
 
     /**
@@ -48,7 +56,10 @@ public class ChessServiceImpl implements ChessService {
         int x = location.getX();
         int y = location.getY();
         int[][] chessboard = chess.getChessboard();
-        return x >= 0 && x < CHESSBOARD_SIZE && y >= 0 && y < CHESSBOARD_SIZE && chessboard[x][y] == 0;
+        if(x >=0 && x < CHESSBOARD_SIZE && y >= 0 && y < CHESSBOARD_SIZE && chessboard[x][y] == 0){
+            return true;
+        }
+        return false;
     }
 
     /**

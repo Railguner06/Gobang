@@ -1,13 +1,21 @@
 package org.example.game.entity;
 
+import lombok.Data;
+
 import java.util.Stack;
 
+@Data
 public class ChessEntity {
+
     public static final int CHESSBOARD_SIZE = 15;
-    public static int FIRST = 1;//先手，-1表示机器，1表示人类，与Location类中的对应
-    private int[][] chessboard = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//与界面棋盘对应，0代表空，-1代表机器，1代表人类
-    private int[][] score = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//每个位置得分
-    private Stack<LocationEntity> history = new Stack<>(); // 用于记录每一步的历史
+    //先手，-1表示机器，1表示人类，与LocationEntity中的对应
+    public static int FIRST = 1;
+    //与界面棋盘对应，0代表空，-1代表机器，1代表人类
+    private int[][] chessboard = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];
+    //每个位置得分
+    private int[][] score = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];
+    // 用于记录每一步的历史
+    private Stack<LocationEntity> history = new Stack<>();
 
     /**
      * 初始化
