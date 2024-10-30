@@ -80,4 +80,17 @@ public class Chessboard extends JPanel{
     public boolean isEmpty(){
         return locationList.size() == 0 ? true : false;
     }
+
+    //悔棋
+    public void undoMove(){
+        // 回退玩家的最后一步
+        if (!locationList.isEmpty()) {
+            locationList.remove(locationList.size() - 1); // 移除最后一个棋子
+        }
+        // 回退机器的最后一步
+        if (!locationList.isEmpty()) {
+            locationList.remove(locationList.size() - 1); // 再次移除上一个棋子
+        }
+        repaint(); // 重新绘制棋盘
+    }
 }

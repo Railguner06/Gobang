@@ -16,10 +16,12 @@ public class UI{
     private Chess chess = new Chess();
 
     private JMenuBar menu;//菜单栏
-    private JMenu option;//菜单栏中的“选项”菜单
-    private Action replayOption;//“选项”下拉项中的“重玩一盘”选项
-    private Action AIFirstOption;//“选项”下拉项中的“机器先手”选项
-    private Action HumanFirstOption;//“选项”下拉项中的“人类先手”选项
+    private JMenu option;//选项菜单
+    private Action replayOption;//重玩一盘选项
+    private Action AIFirstOption;//机器先手选项
+    private Action HumanFirstOption;//人类先手选项
+
+    private Action undoOption;//悔棋选项
 
     //游戏运行入口
     public static void main(String[] args){
@@ -43,6 +45,8 @@ public class UI{
         option.add(AIFirstOption);
         HumanFirstOptionInit();
         option.add(HumanFirstOption);
+        undoOptionInit();
+        option.add(undoOption);
 
         frame.setJMenuBar(menu);//把menu设置为frame的菜单栏
         frame.add(chessboard);//把五子棋盘加入到frame
@@ -141,4 +145,16 @@ public class UI{
         }
     }
 
+    public void undoOptionInit(){
+        undoOption = new AbstractAction("悔棋", new ImageIcon("image/undo.png")) {
+            public void actionPerformed(ActionEvent e) {
+                // 检查是否有可以悔棋的操作
+                if (chess.undoMove()) { // 若棋局逻辑能悔棋
+                    chessboard.undoMove(); // 在界面上也撤销最新的一步棋
+                } else {
+                    JOptionPane.showMessageDialog(frame, "无可悔棋的操作", "提示", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        };
+    }
 }

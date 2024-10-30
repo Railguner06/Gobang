@@ -1,6 +1,7 @@
 package org.example.game;
 
 
+import java.util.Stack;
 
 //下棋业务核心类，与界面棋盘对应，业务放在这里，可以和界面代码分离
 public class Chess{
@@ -9,8 +10,23 @@ public class Chess{
     private int[][] chessboard = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//与界面棋盘对应，0代表空，-1代表机器，1代表人类
     private int[][] score = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//每个位置得分
 
-    public Chess(){}
+    private Stack<Move> history = new Stack<>(); // 用于记录每一步的历史
 
+    private static class Move {
+        int x, y, owner;
+
+        Move(int x, int y, int owner) {
+            this.x = x;
+            this.y = y;
+            this.owner = owner;
+        }
+    }
+
+    public Chess(){
+        init();
+    }
+
+    //初始化
     public void init(){
         FIRST = 1;//默认人类先手
         for(int i = 0; i  < CHESSBOARD_SIZE; i++){
@@ -19,16 +35,25 @@ public class Chess{
                 score[i][j] = 0;
             }
         }
+        history.clear();
     }
 
     //落子
     public void addChessman(int x, int y, int owner){
         chessboard[x][y] = owner;
+        history.push(new Move(x,y,owner));
     }
 
     //判断落子位置是否合法
     public boolean isLegal(int x, int y){
-        if(x >=0 && x < CHESSBOARD_SIZE && y >= 0 && y < CHESSBOARD_SIZE && chessboard[x][y] == 0){
+        return x >= 0 && x < CHESSBOARD_SIZE && y >= 0 && y < CHESSBOARD_SIZE && chessboard[x][y] == 0;
+    }
+
+    //悔棋
+    public boolean undoMove(){
+        if(!history.isEmpty()){
+            Move lastMove = history.pop();
+            chessboard[lastMove.x][lastMove.y]=0;
             return true;
         }
         return false;
