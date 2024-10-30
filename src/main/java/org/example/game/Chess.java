@@ -10,7 +10,7 @@ public class Chess{
     private int[][] chessboard = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//与界面棋盘对应，0代表空，-1代表机器，1代表人类
     private int[][] score = new int[CHESSBOARD_SIZE][CHESSBOARD_SIZE];//每个位置得分
 
-    private Stack<Move> history = new Stack<>(); // 用于记录每一步的历史
+    private Stack<Location> history = new Stack<>(); // 用于记录每一步的历史
 
     private static class Move {
         int x, y, owner;
@@ -41,22 +41,24 @@ public class Chess{
     //落子
     public void addChessman(int x, int y, int owner){
         chessboard[x][y] = owner;
-        history.push(new Move(x,y,owner));
+        history.push(new Location(x,y,owner));
     }
 
     //判断落子位置是否合法
-    public boolean isLegal(int x, int y){
+    public boolean isLegal(int x, int y) {
         return x >= 0 && x < CHESSBOARD_SIZE && y >= 0 && y < CHESSBOARD_SIZE && chessboard[x][y] == 0;
     }
 
-    //悔棋
-    public boolean undoMove(){
-        if(!history.isEmpty()){
-            Move lastMove = history.pop();
-            chessboard[lastMove.x][lastMove.y]=0;
+    // 悔棋：回退两步
+    public boolean undoMove() {
+        if (history.size() >= 2) { // 检查是否有足够步数可以悔棋
+            Location lastMove = history.pop(); // 取出最后一个落子位置
+            chessboard[lastMove.getX()][lastMove.getY()] = 0; // 清空该位置
+            Location secondLastMove = history.pop(); // 取出倒数第二个落子位置
+            chessboard[secondLastMove.getX()][secondLastMove.getY()] = 0; // 清空该位置
             return true;
         }
-        return false;
+        return false; // 不足两步无法悔棋
     }
 
     //判断哪方赢了（必定有刚落的子引发，因此只需判断刚落子的周围），owner为-1代表机器，owner为1代表人类
