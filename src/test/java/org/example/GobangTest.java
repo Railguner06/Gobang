@@ -7,6 +7,6 @@ import org.example.game.UI;
  */
 public class GobangTest {
     public static void main(String[] args){
-        new UI().init();
+        new UIServiceImpl().init();
     }
 }
