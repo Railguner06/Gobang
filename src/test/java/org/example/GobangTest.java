@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.game.UI;
+import org.example.game.service.impl.UIServiceImpl;
 
 /**
  * 测试类
