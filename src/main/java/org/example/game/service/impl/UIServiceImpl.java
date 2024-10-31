@@ -13,7 +13,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class UIServiceImpl implements UIService {
-    UIEntity uiEntity ;
+    private UIEntity uiEntity ;
+
+    /**
+     * 初始化
+     */
     @Override
     public void init() {
         uiEntity = new UIEntity();
@@ -58,8 +62,10 @@ public class UIServiceImpl implements UIService {
         frame.setVisible(true);
     }
 
-    @Override
-    public void replayOptionInit() {
+    /**
+     * 重玩一盘
+     */
+    private void replayOptionInit() {
         uiEntity.setReplayOption(new AbstractAction("重玩一盘", new ImageIcon("image/replay.png")){
             public void actionPerformed(ActionEvent e){
                 uiEntity.getChessboardService().init();//界面方面：初始化重来
@@ -69,8 +75,10 @@ public class UIServiceImpl implements UIService {
         });
     }
 
-    @Override
-    public void AIFirstOptionInit() {
+    /**
+     * 机器先手
+     */
+    private void AIFirstOptionInit() {
         uiEntity.setAIFirstOption(new AbstractAction("机器先手", new ImageIcon("image/robot.png")){
             public void actionPerformed(ActionEvent e){
                 //棋盘还没有落子的时候可以选择“机器先手”，一旦有落子，选择“机器先手”失效
@@ -84,8 +92,10 @@ public class UIServiceImpl implements UIService {
         });
     }
 
-    @Override
-    public void HumanFirstOptionInit() {
+    /**
+     * 人类先手
+     */
+    private void HumanFirstOptionInit() {
         uiEntity.setHumanFirstOption(new AbstractAction("人类先手", new ImageIcon("image/human.png")){
             public void actionPerformed(ActionEvent e){
                 //棋盘还没有落子的时候可以选择“人类先手”，一旦有落子，选择“人类先手”失效
@@ -96,8 +106,11 @@ public class UIServiceImpl implements UIService {
         });
     }
 
-    @Override
-    public void play(MouseEvent e) {
+    /**
+     * 鼠标点击事件
+     * @param e
+     */
+    private void play(MouseEvent e) {
         ChessBoardService chessboardService = uiEntity.getChessboardService();
         ChessService chessService = uiEntity.getChessService();
         int cellSize = chessboardService.getCellSize();//每个格子的边长
@@ -133,8 +146,10 @@ public class UIServiceImpl implements UIService {
         }
     }
 
-    @Override
-    public void undoOptionInit() {
+    /**
+     * 悔棋
+     */
+    private void undoOptionInit() {
         uiEntity.setUndoOption(new AbstractAction("悔棋", new ImageIcon("image/undo.png")) {
             public void actionPerformed(ActionEvent e) {
                 // 检查是否有可以悔棋的操作

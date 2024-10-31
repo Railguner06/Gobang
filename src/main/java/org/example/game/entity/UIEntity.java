@@ -22,5 +22,4 @@ public class UIEntity {
     private Action HumanFirstOption;//人类先手选项
 
     private Action undoOption;//悔棋选项
-
 }
